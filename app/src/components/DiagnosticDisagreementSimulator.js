@@ -4,6 +4,7 @@ import RefreshButton from "./basicComponents/RefreshButton";
 import {P_DD_minus_given_Ir, P_DD_plus_given_Ir} from "../diagnostic_disagreement_functions";
 import MeasuresInput from "./MeasuresInput";
 import MetaInput from "./MetaInput";
+import Graph from "./Graph";
 
 
 const useStyles = makeStyles()((theme, _params, classes) => ({
@@ -42,9 +43,42 @@ const DiagnosticDisagreementSimulator = ({ }) => {
     const [upperBoundCO, setUpperBoundCO] = useState(12);
     const [LoA, setLoA] = useState(2);
     const [PVRLimit, setPVRLimit] = useState(2);
-    const [mPAP, setMPAP] = useState();
-    const [PAWP, setPAWP] = useState();
+    const [mPAP, setMPAP] = useState(20);
+    const [PAWP, setPAWP] = useState(15);
     const [mCO, setMCO] = useState();
+    const [simulatedDDlus, setSimulatedDDlus] = useState([]);
+    const [simulatedDDMinus, setSimulatedDDMinus] = useState([]);
+
+    // Use effect to monitor changes in mPAP, PAWP, mCO, LoA, lowerBoundCO, upperBoundCO, PVRThreshold, and update simulatedDDlus
+    useEffect(() => {
+        simulateDD();
+    } , [mPAP, PAWP, mCO, LoA, lowerBoundCO, upperBoundCO, PVRLimit]);
+
+    const simulateDD = () => {
+        // if any of mPAP, PAWP, LoA, lowerBoundCO, upperBoundCO, PVRThreshold is empty, return []
+        if (!mPAP || !PAWP || !LoA || !lowerBoundCO || !upperBoundCO || !PVRLimit) {
+            return [];
+        }
+        const step = 0.01;
+        const graph_lower_bound_CO = 0;
+        const CORange = Array.from({ length: (upperBoundCO - graph_lower_bound_CO) / step + 1 }, (_, index) => graph_lower_bound_CO + index * step);
+
+        const simulatedDDlus = CORange.map((CO) => {
+            return {x: CO, y: P_DD_plus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+        })
+
+        const simulatedDDMinus = CORange.map((CO) => {
+            return {x: CO, y: P_DD_minus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+        })
+
+        // filter out any null values in y
+        const filteredsimulatedDDlus = simulatedDDlus.filter((d) => d.y !== 0);
+        const filteredsimulatedDDMinus = simulatedDDMinus.filter((d) => d.y !== 0);
+
+        setSimulatedDDlus(filteredsimulatedDDlus);
+        setSimulatedDDMinus(filteredsimulatedDDMinus);
+
+    }
 
     return (
         <div>
@@ -58,6 +92,9 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                     <RefreshButton />
                 </div>
                 <div className={classes.phantom}/>
+            </div>
+            <div className={classes.simulator}>
+                <Graph DDPlusData={simulatedDDlus}  DDMinusData={simulatedDDMinus} upperBoundCO={upperBoundCO}/>
             </div>
             <div className={classes.simulator}>
                 <div>DD+: {Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%</div>
