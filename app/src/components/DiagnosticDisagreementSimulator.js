@@ -39,12 +39,12 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 
 const DiagnosticDisagreementSimulator = ({ }) => {
     const {classes} = useStyles();
-    const [lowerBoundCO, setLowerBoundCO] = useState(2);
-    const [upperBoundCO, setUpperBoundCO] = useState(12);
+    const [lowerBoundCO, setLowerBoundCO] = useState(1.3);
+    const [upperBoundCO, setUpperBoundCO] = useState(20);
     const [LoA, setLoA] = useState(2);
     const [PVRLimit, setPVRLimit] = useState(2);
-    const [mPAP, setMPAP] = useState(20);
-    const [PAWP, setPAWP] = useState(15);
+    const [mPAP, setMPAP] = useState([]);
+    const [PAWP, setPAWP] = useState([]);
     const [mCO, setMCO] = useState();
     const [simulatedDDlus, setSimulatedDDlus] = useState([]);
     const [simulatedDDMinus, setSimulatedDDMinus] = useState([]);

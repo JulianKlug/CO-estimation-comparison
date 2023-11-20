@@ -32,7 +32,7 @@ export default function MetaInput({LoA, lowerBoundCO, upperBoundCO, PVRThreshold
             <div style={{'display': 'inline-Flex', 'align-items': 'center'}}>
             {/*Lower limit of CO*/}
             <TextField
-                       inputProps={{style: {width: "2ch", textAlign: 'right'}}}
+                       inputProps={{style: {width: "4ch", textAlign: 'right'}}}
                        id="standard-basic" variant="standard" label={" "} defaultValue={lowerBoundCO}
                     onChange={(event) => {
                                     setLowerBoundCO(event.target.value);

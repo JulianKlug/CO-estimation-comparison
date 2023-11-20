@@ -16,11 +16,14 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
     yaxis: {
         color: 'black',
     },
-
     text: {
       fill: 'gainsboro',
       color: 'gainsboro',
       fontSize: '16px',
+    },
+    legend: {
+        fill: 'rgba(141,140,140,0.75)',
+        fontSize: '16px',
     },
     // Set the border for the whole graph
     graph: {
@@ -39,7 +42,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
     },
     graph_join_line: {
         fill: 'none',
-        stroke: 'grey',
+        stroke: '#8080804d',
         alpha: 0.1
     }
 
@@ -54,6 +57,7 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
         width: 500,
         height: 200
     };
+    const joinedData = [...DDPlusData, ...DDMinusData];
     const yMinValue = d3.min(DDPlusData, (d) => d.y);
     const yMaxValue = d3.max(DDPlusData, (d) => d.y);
     const xMinValue = d3.min(DDPlusData, (d) => d.x);
@@ -71,30 +75,37 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
     const [lineDDMinus, setLineDDMinus] = useState(() =>
         graphDetails.lineGenerator(DDMinusData)
     );
-    // const [lineJoin, setLineJoin] = useState(() => {
-    //     // create line from last point of DDPlusData to first point of DDMinusData
-    //     const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
-    //     const DDMinusDataFirstPoint = DDMinusData[0];
-    //     const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {
-    //         x: DDMinusDataFirstPoint.x,
-    //         y: DDMinusDataFirstPoint.y
-    //     }];
-    //     return graphDetails.lineGenerator(joinLine)
-    // });
+    const [lineJoin, setLineJoin] = useState(() => {
+        if (DDPlusData.length === 0 || DDMinusData.length === 0 || DDPlusData === undefined || DDMinusData === undefined) {
+            return []
+        } else {
+            // create line from last point of DDPlusData to first point of DDMinusData
+            const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
+            const DDMinusDataFirstPoint = DDMinusData[0];
+            const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {
+                x: DDMinusDataFirstPoint.x,
+                y: DDMinusDataFirstPoint.y
+            }];
+            return graphDetails.lineGenerator(joinLine)
+        }
+
+    });
 
     useEffect(() => {
         if (DDPlusData) {
             // Calculate the DDPlusData line
             const newLine = graphDetails.lineGenerator(DDPlusData);
             setLineDDPlus(newLine);
-        }
-        if (DDMinusData) {
-             // create line from last point of DDPlusData to first point of DDMinusData
-            // const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
-            // const DDMinusDataFirstPoint = DDMinusData[0];
-            // const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {x: DDMinusDataFirstPoint.x, y: DDMinusDataFirstPoint.y}];
-            // const newLine = graphDetails.lineGenerator(joinLine);
-            // setLineJoin(newLine);
+            if (DDPlusData.length !== 0 && DDMinusData.length !== 0) {
+                 // create line from last point of DDPlusData to first point of DDMinusData
+                const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
+                const DDMinusDataFirstPoint = DDMinusData[0];
+                const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {x: DDMinusDataFirstPoint.x, y: DDMinusDataFirstPoint.y}];
+                const newLine = graphDetails.lineGenerator(joinLine);
+                setLineJoin(newLine);
+            } else {
+                setLineJoin([])
+            }
         }
     }, [DDPlusData]);
 
@@ -103,14 +114,16 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
             // Calculate the DDMinusData line
             const newLine = graphDetails.lineGenerator(DDMinusData);
             setLineDDMinus(newLine);
-        }
-        if (DDPlusData) {
-             // create line from last point of DDPlusData to first point of DDMinusData
-            // const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
-            // const DDMinusDataFirstPoint = DDMinusData[0];
-            // const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {x: DDMinusDataFirstPoint.x, y: DDMinusDataFirstPoint.y}];
-            // const newLine = graphDetails.lineGenerator(joinLine);
-            // setLineJoin(newLine);
+            if (DDPlusData.length !== 0 && DDMinusData.length !== 0) {
+                // create line from last point of DDPlusData to first point of DDMinusData
+                const DDPlusDataLastPoint = DDPlusData[DDPlusData.length - 1];
+                const DDMinusDataFirstPoint = DDMinusData[0];
+                const joinLine = [{x: DDPlusDataLastPoint.x, y: DDPlusDataLastPoint.y}, {x: DDMinusDataFirstPoint.x, y: DDMinusDataFirstPoint.y}];
+                const newLine = graphDetails.lineGenerator(joinLine);
+                setLineJoin(newLine);
+            } else {
+                setLineJoin([])
+            }
         }
     }, [DDMinusData]);
 
@@ -132,7 +145,7 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
     const handleMouseMove = (e) => {
         const bisect = d3.bisector((d) => d.x).left,
                 x0 = graphDetails.xScale.invert(d3.pointer(e, this)[0]),
-                index = bisect(DDPlusData, x0, 1);
+                index = bisect(joinedData, x0, 1);
         setActiveIndex(index);
     };
 
@@ -155,12 +168,12 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
             // DDMinusData
             <path className={classes.graph_DDminus_data} d={lineDDMinus} />
             // join line
-            {/*<path className={classes.graph_join_line} d={lineJoin} />*/}
+            <path className={classes.graph_join_line} d={lineJoin} stroke-dasharray="4 1"/>
 
 
             // Site label (upper right)
             <text
-                className={classes.text}
+                className={classes.legend}
                 transform={`translate(${layout.width - 100}, 20)`}
             >
                 {"Probability of DD"}
@@ -174,6 +187,39 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
           >
               {"Probability"}
           </text>
+
+            // x-axis label
+            <text
+                className={classes.text}
+                transform={`translate(${layout.width / 2 + layout.width /4}, ${layout.height + 40})`}
+            >
+                {"Cardiac Output (L/min)"}
+            </text>
+
+            // Add legend
+            <text
+                className={classes.legend}
+                transform={`translate(${layout.width - 100}, 40)`}
+            >
+                {"DD+"}
+            </text>
+            <text
+                className={classes.legend}
+                transform={`translate(${layout.width - 100}, 60)`}
+            >
+                {"DD-"}
+            </text>
+
+            <line
+                className={classes.graph_DDplus_data}
+                x1={layout.width - 60} y1={35}
+                x2={layout.width - 50} y2={35}
+            />
+            <line
+                className={classes.graph_DDminus_data}
+                x1={layout.width - 60} y1={55}
+                x2={layout.width - 50} y2={55}
+            />
 
             // Axes
              <g className={classes.yaxis} ref={getYAxis} />
@@ -195,7 +241,7 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
     {/*        />*/}
 
             // Hovering
-            {DDPlusData.map((item, index) => {
+            {joinedData.map((item, index) => {
               return (
                   <g key={index}>
                   // hovering text 
@@ -237,7 +283,7 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
                             textAnchor="left"
                         >
                             {index === activeIndex
-                                ? item.x
+                                ? item.x.toFixed(2)
                                 : ""}
                         </text>                    
                   </g>
