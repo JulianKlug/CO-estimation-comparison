@@ -43,9 +43,9 @@ const DiagnosticDisagreementSimulator = ({ }) => {
     const [upperBoundCO, setUpperBoundCO] = useState(20);
     const [LoA, setLoA] = useState(2);
     const [PVRLimit, setPVRLimit] = useState(2);
-    const [mPAP, setMPAP] = useState([]);
-    const [PAWP, setPAWP] = useState([]);
-    const [mCO, setMCO] = useState();
+    const [mPAP, setMPAP] = useState(25);
+    const [PAWP, setPAWP] = useState(10);
+    const [mCO, setMCO] = useState(4);
     const [simulatedDDlus, setSimulatedDDlus] = useState([]);
     const [simulatedDDMinus, setSimulatedDDMinus] = useState([]);
 
@@ -94,7 +94,9 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                 <div className={classes.phantom}/>
             </div>
             <div className={classes.simulator}>
-                <Graph DDPlusData={simulatedDDlus}  DDMinusData={simulatedDDMinus} upperBoundCO={upperBoundCO}/>
+                <Graph DDPlusData={simulatedDDlus}  DDMinusData={simulatedDDMinus}
+                       measuredCO={mCO}
+                       upperBoundCO={upperBoundCO}/>
             </div>
             <div className={classes.simulator}>
                 <div>DD+: {Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%</div>

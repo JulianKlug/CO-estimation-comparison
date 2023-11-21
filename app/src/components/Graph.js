@@ -49,20 +49,17 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 
 }));
 
-const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
+const Graph = ({ DDPlusData, DDMinusData, measuredCO, upperBoundCO }) => {
     const {classes} = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(null)
+
+    measuredCO = parseFloat(measuredCO);
 
     const layout = {
         width: 500,
         height: 200
     };
     const joinedData = [...DDPlusData, ...DDMinusData];
-    const yMinValue = d3.min(DDPlusData, (d) => d.y);
-    const yMaxValue = d3.max(DDPlusData, (d) => d.y);
-    const xMinValue = d3.min(DDPlusData, (d) => d.x);
-    const xMaxValue = d3.max(DDPlusData, (d) => d.x);
-
 
     const graphDetails = {
         xScale: scaleLinear().domain([0, upperBoundCO]).range([0, layout.width]),
@@ -229,16 +226,44 @@ const Graph = ({ DDPlusData, DDMinusData, upperBoundCO }) => {
                   transform={`translate(0,${layout.height})`}
               />
 
-    {/*// display current time (new Date()) as dot on x-axis if current time inf to max of x-axis*/}
-    {/*        <circle*/}
-    {/*            cx={graphDetails.xScale(new Date())}*/}
-    {/*            cy={layout.height}*/}
-    {/*            r={new Date() < graphDetails.xScale.domain()[1] ? 2 : 0}*/}
-    {/*            fill='#666'*/}
-    {/*            strokeWidth={new Date() < graphDetails.xScale.domain()[1] ? 2 : 0}*/}
-    {/*            stroke="#fff"*/}
-    {/*            style={{ transition: "ease-out .1s" }}*/}
-    {/*        />*/}
+    {/*// display measured CO as line with dot on x-axis if inf to max of x-axis*/}
+            {typeof measuredCO === 'number' && isNaN(measuredCO) === false
+                            ? (
+            <g>
+            <line
+                x1={graphDetails.xScale(measuredCO)}
+                y1={graphDetails.yScale(0)}
+                x2={graphDetails.xScale(measuredCO)}
+                y2={graphDetails.yScale(0.1)}
+                stroke="#666"
+                strokeWidth={0.5}
+                style={{ transition: "ease-out .1s" }}
+            />
+            <circle
+                cx={graphDetails.xScale(measuredCO)}
+                cy={graphDetails.yScale(0.1)}
+                r={2}
+                fill='black'
+                strokeWidth={2}
+                stroke="#fff"
+                style={{ transition: "ease-out .1s" }}
+            />
+             <text
+                fill="#666"
+                // half of text size of dosis
+                fontSize={8}
+                x={graphDetails.xScale(measuredCO + 0.1)}
+                y={graphDetails.yScale(0.12)}
+                textAnchor="left"
+            >
+                 {measuredCO.toFixed(1)}
+            </text>
+            </g>
+            )
+            : null
+            }
+
+
 
             // Hovering
             {joinedData.map((item, index) => {
