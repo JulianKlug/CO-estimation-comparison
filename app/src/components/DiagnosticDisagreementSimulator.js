@@ -5,6 +5,7 @@ import {P_DD_minus_given_Ir, P_DD_plus_given_Ir} from "../diagnostic_disagreemen
 import MeasuresInput from "./MeasuresInput";
 import MetaInput from "./MetaInput";
 import Graph from "./Graph";
+import {Typography} from "@mui/material";
 
 
 const useStyles = makeStyles()((theme, _params, classes) => ({
@@ -13,6 +14,22 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         margin: 'auto',
         marginTop: '5vh',
         marginBottom: '5vh'
+    },
+    simulatorResults: {
+        width: '80vw',
+        margin: 'auto',
+        marginTop: '5vh',
+        marginBottom: '5vh',
+        display: 'flex',
+        justifyContent: 'center'
+    },
+    simulatorResultsText: {
+      textAlign: 'left'
+    },
+    simulatorResultNumbers: {
+        display: 'inline-block',
+        textAlign: 'right',
+        width: '7ch'
     },
     measuresInput: {
         width: '90%',
@@ -42,10 +59,10 @@ const DiagnosticDisagreementSimulator = ({ }) => {
     const [lowerBoundCO, setLowerBoundCO] = useState(1.3);
     const [upperBoundCO, setUpperBoundCO] = useState(20);
     const [LoA, setLoA] = useState(2);
-    const [PVRLimit, setPVRLimit] = useState(2);
-    const [mPAP, setMPAP] = useState(25);
-    const [PAWP, setPAWP] = useState(10);
-    const [mCO, setMCO] = useState(4);
+    const [PVRLimit, setPVRLimit] = useState(3);
+    const [mPAP, setMPAP] = useState();
+    const [PAWP, setPAWP] = useState();
+    const [mCO, setMCO] = useState();
     const [simulatedDDlus, setSimulatedDDlus] = useState([]);
     const [simulatedDDMinus, setSimulatedDDMinus] = useState([]);
 
@@ -98,9 +115,19 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                        measuredCO={mCO}
                        upperBoundCO={upperBoundCO}/>
             </div>
-            <div className={classes.simulator}>
-                <div>DD+: {Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%</div>
-                <div>DD-: {Number(P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%</div>
+            <div className={classes.simulatorResults}>
+                <div className={classes.simulatorResultsText}>
+                <Typography>DD+:
+                    <div className={classes.simulatorResultNumbers}>
+                        {Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%
+                    </div>
+                </Typography>
+                <Typography>DD-:
+                    <div className={classes.simulatorResultNumbers}>
+                         {Number(P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%
+                    </div>
+                </Typography>
+                </div>
             </div>
 
             <div className={classes.measuresInput}>
