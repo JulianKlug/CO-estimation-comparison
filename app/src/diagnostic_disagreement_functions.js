@@ -12,11 +12,11 @@ Pulmonary Arterial Wedge Pressure (PAWP), and Cardiac Output (CO).
 @param {number} CO - The Cardiac Output.
 @returns {number} The calculated Pulmonary Vascular Resistance (PVR).
  */
-function PVR_calc(mPAP, PAWP, CO) {
+function PVR_calc(mPAP, PAWP, CO, epsilon = 0.0001) {
 
     // transpulmonary pressure gradient
     const TPG = mPAP - PAWP;
-    const PVR = TPG / CO;
+    const PVR = TPG / (CO + epsilon);
     return PVR;
 }
 
@@ -27,10 +27,10 @@ function PVR_calc(mPAP, PAWP, CO) {
  * @param {number} mPAP - Mean pulmonary artery pressure.
  * @param {number} PAWP - Pulmonary artery wedge pressure.
  * @param {number} CO - Cardiac output.
- * @param {number} PVRLimit - PVR limit for diagnosis of PcPH (default is 3).
+ * @param {number} PVRLimit - PVR limit for diagnosis of PcPH (default is 2).
  * @returns {boolean} - True if meets PcPH criteria, false otherwise.
  */
-function meets_PcPH_criteria(mPAP, PAWP, CO, PVRLimit = 3) {
+function meets_PcPH_criteria(mPAP, PAWP, CO, PVRLimit = 2) {
     // Calculate PVR using the PVR_calc function
     const PVR = PVR_calc(mPAP, PAWP, CO);
 
@@ -67,10 +67,10 @@ function cdfNormal (x, mean, standardDeviation) {
  * @param {number} ar - Lower bound of cardiac output.
  * @param {number} br - Upper bound of cardiac output.
  * @param {number} LoA - Limits of agreement.
- * @param {number} PVR_limit - PVR limit for diagnosis of PcPH (default is 3).
+ * @param {number} PVR_limit - PVR limit for diagnosis of PcPH (default is 2).
  * @returns {number} - Probability of P(DD ∩ Ir).
  */
-function P_DD_and_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 3) {
+function P_DD_and_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 2) {
     // Delta to lower and upper bounds of interval
     const delta_COm_lower_bound = COm - ar;
     const delta_COm_upper_bound = COm - br;
@@ -149,10 +149,10 @@ function P_Ir(COm, ar, br, LoA) {
  * @param {number} ar - Lower bound of cardiac output.
  * @param {number} br - Upper bound of cardiac output.
  * @param {number} LoA - Limits of agreement.
- * @param {number} PVR_limit - PVR limit (default is 3).
+ * @param {number} PVR_limit - PVR limit (default is 2).
  * @returns {number} - Probability of P(DD+|Ir).
  */
-function P_DD_plus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 3) {
+function P_DD_plus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 2) {
     // Calculate P(DD ∩ Ir) and P(Ir)
     const P_DD_and_Ir_value = P_DD_and_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit);
     const P_Ir_value = P_Ir(COm, ar, br, LoA);
@@ -177,10 +177,10 @@ function P_DD_plus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 3) {
  * @param {number} ar - Lower bound of cardiac output.
  * @param {number} br - Upper bound of cardiac output.
  * @param {number} LoA - Limits of agreement.
- * @param {number} PVR_limit - PVR limit (default is 3).
+ * @param {number} PVR_limit - PVR limit (default is 2).
  * @returns {number} - Probability of P(DD-|Ir).
  */
-function P_DD_minus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 3) {
+function P_DD_minus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 2) {
     // Check for NaN inputs
     if (isNaN(mPAP) || isNaN(PAWP) || isNaN(COm)) {
         return 0;
@@ -200,5 +200,71 @@ function P_DD_minus_given_Ir(mPAP, PAWP, COm, ar, br, LoA, PVR_limit = 3) {
     }
 }
 
+/**
+ * Calculates the relative P(DD) where LoA is giving relatively
+ *
+ * @param {number} mPAP - The mean pulmonary arterial pressure.
+ * @param {number} PAWP - The pulmonary artery wedge pressure.
+ * @param {number} COm - The cardiac output.
+ * @param {number} LoA - Limits of agreement.
+ * @param {number} [PVR_limit=2] - The pulmonary vascular resistance limit for diagnosis of PcPH.
+ * @returns {number} P(DD) - The calculated relative P(DD).
+ */
+function relative_P_DD(mPAP, PAWP, COm, LoA, PVR_limit = 2) {
+    const PVR = PVR_calc(mPAP, PAWP, COm);
+    const relative_X = 2 * (PVR_limit - PVR) / (PVR_limit + PVR);
+    const relative_P_DD = cdfNormal(relative_X, 0, LoA / 1.96);
+    return relative_P_DD;
+}
 
-export { PVR_calc, P_DD_plus_given_Ir, P_DD_minus_given_Ir };
+/**
+ * Calculates the relative P(DD+) where LoA is giving relatively
+ * @param {number} mPAP - The mean pulmonary arterial pressure.
+ * @param {number} PAWP - The pulmonary artery wedge pressure.
+ * @param {number} COm - The cardiac output.
+ * @param {number} LoA - Limits of agreement.
+ * @param {number} [PVR_limit=2] - The pulmonary vascular resistance limit for diagnosis of PcPH.
+ * @returns {number} P(DD+) - The calculated relative P(DD+).
+ */
+function relative_P_DD_plus(mPAP, PAWP, COm, LoA, PVR_limit = 2) {
+    // Check for NaN inputs
+    if (isNaN(mPAP) || isNaN(PAWP) || isNaN(COm)) {
+        return 0;
+    }
+
+    // Only valid if PcPH criteria are met
+    if (meets_PcPH_criteria(mPAP, PAWP, COm, PVR_limit)) {
+        // Compute relative P(DD+)
+        const relative_P_DD_plus = relative_P_DD(mPAP, PAWP, COm, LoA, PVR_limit);
+        return relative_P_DD_plus;
+    } else {
+        return 0;
+    }
+}
+
+/**
+ * Calculates the relative P(DD-) where LoA is giving relatively
+ * @param mPAP - The mean pulmonary arterial pressure.
+ * @param PAWP - The pulmonary artery wedge pressure.
+ * @param COm - The cardiac output.
+ * @param LoA - Limits of agreement.
+ * @param PVR_limit - The pulmonary vascular resistance limit for diagnosis of PcPH.
+ * @returns {number} P(DD-) - The calculated relative P(DD-).
+ */
+function relative_P_DD_minus(mPAP, PAWP, COm, LoA, PVR_limit = 2) {
+    // Check for NaN inputs
+    if (isNaN(mPAP) || isNaN(PAWP) || isNaN(COm)) {
+        return 0;
+    }
+
+    // Only valid if PcPH criteria are not met
+    if (!meets_PcPH_criteria(mPAP, PAWP, COm, PVR_limit)) {
+        // Compute relative P(DD-)
+        const relative_P_DD_minus = 1 - relative_P_DD(mPAP, PAWP, COm, LoA, PVR_limit);
+        return relative_P_DD_minus;
+    } else {
+        return 0;
+    }
+}
+
+export { PVR_calc, P_DD_plus_given_Ir, P_DD_minus_given_Ir , relative_P_DD_plus, relative_P_DD_minus };

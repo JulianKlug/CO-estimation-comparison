@@ -16,7 +16,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         color: 'darkgray'
     },
     footerTitle: {
-        marginLeft: '3vw'
+        marginLeft: "auto"
     },
     infoButtonPosition: {
         position: "fixed",
@@ -34,7 +34,7 @@ const Footer = () => {
             <div>
                 <div className={classes.phantom}/>
                 <div className={classes.footer}>
-                    <h2 className={classes.footerTitle}>Diagnostic disagreement for PcPH</h2>
+                    <h2 className={classes.footerTitle}>Diagnostic disagreement for the classification of pulmonary hypertension</h2>
                 </div>
             </div>
         </div>

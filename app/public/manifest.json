@@ -1,6 +1,6 @@
 {
-  "short_name": "DD4PcPH",
-  "name": "Diagnostic disagreement for PcPH",
+  "short_name": "DD4PH",
+  "name": "Diagnostic disagreement for PH classification",
   "icons": [
         {
       "src": "favicon.ico",

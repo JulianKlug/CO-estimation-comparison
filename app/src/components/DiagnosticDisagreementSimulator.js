@@ -1,7 +1,12 @@
 import { makeStyles } from 'tss-react/mui';
 import { useEffect, useState } from "react";
 import RefreshButton from "./basicComponents/RefreshButton";
-import {P_DD_minus_given_Ir, P_DD_plus_given_Ir} from "../diagnostic_disagreement_functions";
+import {
+    P_DD_minus_given_Ir,
+    P_DD_plus_given_Ir, PVR_calc,
+    relative_P_DD_minus,
+    relative_P_DD_plus
+} from "../diagnostic_disagreement_functions";
 import MeasuresInput from "./MeasuresInput";
 import MetaInput from "./MetaInput";
 import Graph from "./Graph";
@@ -12,7 +17,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
     simulator: {
         width: '80vw',
         margin: 'auto',
-        marginTop: '5vh',
+        marginTop: '10vh',
         marginBottom: '5vh'
     },
     simulatorResults: {
@@ -32,7 +37,6 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         width: '7ch'
     },
     measuresInput: {
-        width: '90%',
         margin: 'auto',
         marginBottom: '0.5vh'
     },
@@ -56,10 +60,11 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 
 const DiagnosticDisagreementSimulator = ({ }) => {
     const {classes} = useStyles();
+    const [method, setMethod] = useState("absolute");
     const [lowerBoundCO, setLowerBoundCO] = useState(1.3);
     const [upperBoundCO, setUpperBoundCO] = useState(20);
     const [LoA, setLoA] = useState(2);
-    const [PVRLimit, setPVRLimit] = useState(3);
+    const [PVRLimit, setPVRLimit] = useState(2);
     const [mPAP, setMPAP] = useState();
     const [PAWP, setPAWP] = useState();
     const [mCO, setMCO] = useState();
@@ -81,11 +86,21 @@ const DiagnosticDisagreementSimulator = ({ }) => {
         const CORange = Array.from({ length: (upperBoundCO - graph_lower_bound_CO) / step + 1 }, (_, index) => graph_lower_bound_CO + index * step);
 
         const simulatedDDlus = CORange.map((CO) => {
-            return {x: CO, y: P_DD_plus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+            if (method === "absolute") {
+                return {x: CO, y: P_DD_plus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+            }
+            if (method === "relative") {
+                return {x: CO, y: relative_P_DD_plus(mPAP, PAWP, CO, LoA, PVRLimit)}
+            }
         })
 
         const simulatedDDMinus = CORange.map((CO) => {
-            return {x: CO, y: P_DD_minus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+            if (method === "absolute") {
+                return {x: CO, y: P_DD_minus_given_Ir(mPAP, PAWP, CO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)}
+            }
+            if (method === "relative") {
+                return {x: CO, y: relative_P_DD_minus(mPAP, PAWP, CO, LoA, PVRLimit)}
+            }
         })
 
         // filter out any null values in y
@@ -103,7 +118,9 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                 <div className={classes.metaInput}>
                     <MetaInput
                                 LoA={LoA} lowerBoundCO={lowerBoundCO} upperBoundCO={upperBoundCO} PVRThreshold={PVRLimit}
-                               setLoA={setLoA} setLowerBoundCO={setLowerBoundCO} setUpperBoundCO={setUpperBoundCO} setPVRThreshold={setPVRLimit}/>
+                               setLoA={setLoA} setLowerBoundCO={setLowerBoundCO} setUpperBoundCO={setUpperBoundCO} setPVRThreshold={setPVRLimit}
+                                method={method} setMethod={setMethod}
+                    />
                 </div>
                 <div className={classes.refreshButtonPosition}>
                     <RefreshButton />
@@ -119,12 +136,22 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                 <div className={classes.simulatorResultsText}>
                 <Typography>DD+:
                     <div className={classes.simulatorResultNumbers}>
-                        {Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%
+                        { method === "absolute" ? (
+                            Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)
+                        ) : (
+                            Number(relative_P_DD_plus(mPAP, PAWP, mCO, LoA, PVRLimit)*100).toFixed(2)
+                        )
+                        }%
                     </div>
                 </Typography>
                 <Typography>DD-:
                     <div className={classes.simulatorResultNumbers}>
-                         {Number(P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)}%
+                         { method === "absolute" ? (
+                             Number(P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)
+                         ) : (
+                                Number(relative_P_DD_minus(mPAP, PAWP, mCO, LoA, PVRLimit)*100).toFixed(2)
+                            )
+                         }%
                     </div>
                 </Typography>
                 </div>
