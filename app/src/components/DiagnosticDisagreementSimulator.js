@@ -1,5 +1,5 @@
 import { makeStyles } from 'tss-react/mui';
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import RefreshButton from "./basicComponents/RefreshButton";
 import {
     P_DD_minus_given_Ir,
@@ -11,6 +11,8 @@ import MeasuresInput from "./MeasuresInput";
 import MetaInput from "./MetaInput";
 import Graph from "./Graph";
 import {Typography} from "@mui/material";
+import MeasuresResults from "./MeasuresResults";
+import {isMobile} from "../utils";
 
 
 const useStyles = makeStyles()((theme, _params, classes) => ({
@@ -18,12 +20,11 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         width: '80vw',
         margin: 'auto',
         marginTop: '10vh',
-        marginBottom: '5vh'
+        marginBottom: isMobile() ? 0 : '7vh',
     },
     simulatorResults: {
         width: '80vw',
         margin: 'auto',
-        marginTop: '5vh',
         marginBottom: '5vh',
         display: 'flex',
         justifyContent: 'center'
@@ -55,7 +56,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         position: "absolute",
         top: '0',
         right: '1vw ',
-    }
+    },
 }));
 
 const DiagnosticDisagreementSimulator = ({ }) => {
@@ -117,49 +118,46 @@ const DiagnosticDisagreementSimulator = ({ }) => {
             <div>
                 <div className={classes.metaInput}>
                     <MetaInput
-                                LoA={LoA} lowerBoundCO={lowerBoundCO} upperBoundCO={upperBoundCO} PVRThreshold={PVRLimit}
-                               setLoA={setLoA} setLowerBoundCO={setLowerBoundCO} setUpperBoundCO={setUpperBoundCO} setPVRThreshold={setPVRLimit}
-                                method={method} setMethod={setMethod}
+                        LoA={LoA} lowerBoundCO={lowerBoundCO} upperBoundCO={upperBoundCO} PVRThreshold={PVRLimit}
+                        setLoA={setLoA} setLowerBoundCO={setLowerBoundCO} setUpperBoundCO={setUpperBoundCO}
+                        setPVRThreshold={setPVRLimit}
+                        method={method} setMethod={setMethod}
                     />
                 </div>
                 <div className={classes.refreshButtonPosition}>
-                    <RefreshButton />
+                    <RefreshButton/>
                 </div>
                 <div className={classes.phantom}/>
             </div>
             <div className={classes.simulator}>
-                <Graph DDPlusData={simulatedDDlus}  DDMinusData={simulatedDDMinus}
+                <Graph DDPlusData={simulatedDDlus} DDMinusData={simulatedDDMinus}
                        measuredCO={mCO}
-                       upperBoundCO={upperBoundCO}/>
+                       mPAP={mPAP} PAWP={PAWP} PVRLimit={PVRLimit}
+                       upperBoundCO={upperBoundCO}
+                />
             </div>
             <div className={classes.simulatorResults}>
                 <div className={classes.simulatorResultsText}>
-                <Typography>DD+:
-                    <div className={classes.simulatorResultNumbers}>
-                        { method === "absolute" ? (
-                            Number(P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)
-                        ) : (
-                            Number(relative_P_DD_plus(mPAP, PAWP, mCO, LoA, PVRLimit)*100).toFixed(2)
-                        )
-                        }%
-                    </div>
-                </Typography>
-                <Typography>DD-:
-                    <div className={classes.simulatorResultNumbers}>
-                         { method === "absolute" ? (
-                             Number(P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)*100).toFixed(2)
-                         ) : (
-                                Number(relative_P_DD_minus(mPAP, PAWP, mCO, LoA, PVRLimit)*100).toFixed(2)
+                    <Typography>Probability of diagnostic error:
+                        <div className={classes.simulatorResultNumbers}>
+                            {method === "absolute" ? (
+                                Number((P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)
+                                    + P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)) * 100).toFixed(2)
+                            ) : (
+                                Number((relative_P_DD_plus(mPAP, PAWP, mCO, LoA, PVRLimit) + relative_P_DD_minus(mPAP, PAWP, mCO, LoA, PVRLimit)) * 100).toFixed(2)
                             )
-                         }%
-                    </div>
-                </Typography>
+                            }%
+                        </div>
+                    </Typography>
                 </div>
             </div>
 
             <div className={classes.measuresInput}>
                 <MeasuresInput mPAP={mPAP} PAWP={PAWP} mCO={mCO} setMPAP={setMPAP} setPAWP={setPAWP} setMCO={setMCO}
                 />
+            </div>
+            <div>
+                <MeasuresResults mPAP={mPAP} PAWP={PAWP} CO={mCO}/>
             </div>
         </div>
     )

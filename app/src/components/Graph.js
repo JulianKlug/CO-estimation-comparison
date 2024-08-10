@@ -49,11 +49,13 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 
 }));
 
-const Graph = ({ DDPlusData, DDMinusData, measuredCO, upperBoundCO }) => {
+const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, upperBoundCO }) => {
     const {classes} = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(null)
 
     measuredCO = parseFloat(measuredCO);
+
+    const COatPVRLimit = (mPAP - PAWP) / PVRLimit;
 
     const layout = {
         width: 500,
@@ -226,6 +228,32 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, upperBoundCO }) => {
                   transform={`translate(0,${layout.height})`}
               />
 
+
+    {/* add fine line at CO at PVR Limit*/}
+            {typeof COatPVRLimit === 'number' && isNaN(COatPVRLimit) === false
+                            ? (
+            <g>
+            <line
+                x1={graphDetails.xScale(COatPVRLimit)}
+                y1={graphDetails.yScale(0)}
+                x2={graphDetails.xScale(COatPVRLimit)}
+                y2={graphDetails.yScale(0.1)}
+                stroke="#666"
+                strokeWidth={0.2}
+                style={{ transition: "ease-out .1s" }}
+            />
+            <text
+                fill="#666"
+                fontSize={8}
+                x={graphDetails.xScale(COatPVRLimit) - 15}
+                y={graphDetails.yScale(0.15)}
+            >
+                PVR = {PVRLimit}
+            </text>
+            </g>
+            ) : null
+            }
+
     {/*// display measured CO as line with dot on x-axis if inf to max of x-axis*/}
             {typeof measuredCO === 'number' && isNaN(measuredCO) === false
                             ? (
@@ -253,7 +281,7 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, upperBoundCO }) => {
                 // half of text size of dosis
                 fontSize={8}
                 x={graphDetails.xScale(measuredCO + 0.1)}
-                y={graphDetails.yScale(0.12)}
+                y={graphDetails.yScale(0.1)}
                 textAnchor="left"
             >
                  {measuredCO.toFixed(1)}

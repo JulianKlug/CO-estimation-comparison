@@ -1,10 +1,12 @@
 import { makeStyles } from 'tss-react/mui';
 import React, {useState} from "react";
+import {isMobile} from "../utils";
+import PaperButton from "./basicComponents/PaperButton";
 
 const useStyles = makeStyles()((theme, _params, classes) => ({
     phantom: {
         display: 'block',
-        height: '80px',
+        height: '100px',
         width: '100%',
     },
     footer: {
@@ -16,11 +18,13 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         color: 'darkgray'
     },
     footerTitle: {
-        marginLeft: "auto"
+        marginLeft: "5vw",
+        marginRight: "10vw",
+        textAlign: "left",
     },
     infoButtonPosition: {
         position: "fixed",
-        bottom: '0',
+        bottom: '1vw',
         right: '1vw ',
     }
 }));
@@ -34,7 +38,16 @@ const Footer = () => {
             <div>
                 <div className={classes.phantom}/>
                 <div className={classes.footer}>
-                    <h2 className={classes.footerTitle}>Diagnostic disagreement for the classification of pulmonary hypertension</h2>
+                    {isMobile() ? (
+                        <h4 className={classes.footerTitle}>Estimated diagnostic error on the classification of PH by
+                            using COTD instead of CODF</h4>
+                    ) : (
+                        <h2 className={classes.footerTitle}>Estimated diagnostic error on the classification of PH by
+                            using COTD instead of CODF</h2>
+                    )}
+                    <div className={classes.infoButtonPosition}>
+                        <PaperButton/>
+                    </div>
                 </div>
             </div>
         </div>
