@@ -10,7 +10,7 @@ import {
 import MeasuresInput from "./MeasuresInput";
 import MetaInput from "./MetaInput";
 import Graph from "./Graph";
-import {Typography} from "@mui/material";
+import {Paper, Typography} from "@mui/material";
 import MeasuresResults from "./MeasuresResults";
 import {isMobile} from "../utils";
 
@@ -23,19 +23,26 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
         marginBottom: isMobile() ? 0 : '7vh',
     },
     simulatorResults: {
-        width: '80vw',
         margin: 'auto',
-        marginBottom: '5vh',
+        marginBottom: '2vh',
         display: 'flex',
         justifyContent: 'center'
     },
+    simulatorResultsItem: {
+        display: 'inline-block',
+        textAlign: 'center',
+    },
     simulatorResultsText: {
-      textAlign: 'left'
+      textAlign: 'center',
+        marginTop: '1vh',
+        marginLeft: '1vw',
+      marginRight: '1vw',
     },
     simulatorResultNumbers: {
         display: 'inline-block',
-        textAlign: 'right',
-        width: '7ch'
+        marginLeft: '1vw',
+        marginRight: '1vw',
+        marginBottom: '1vh',
     },
     measuresInput: {
         margin: 'auto',
@@ -71,6 +78,7 @@ const DiagnosticDisagreementSimulator = ({ }) => {
     const [mCO, setMCO] = useState();
     const [simulatedDDlus, setSimulatedDDlus] = useState([]);
     const [simulatedDDMinus, setSimulatedDDMinus] = useState([]);
+    const PAWPThreshold = 15;
 
     // Use effect to monitor changes in mPAP, PAWP, mCO, LoA, lowerBoundCO, upperBoundCO, PVRThreshold, and update simulatedDDlus
     useEffect(() => {
@@ -137,9 +145,18 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                 />
             </div>
             <div className={classes.simulatorResults}>
-                <div className={classes.simulatorResultsText}>
-                    <Typography>Probability of diagnostic error:
-                        <div className={classes.simulatorResultNumbers}>
+                    <Paper elevation={1} className={classes.simulatorResultsItem}>
+                        <Typography variant={'subtitle2'} className={classes.simulatorResultsText}>
+                            {(mPAP < 20 || isNaN(mPAP)) ? "No pulmonary hypertension" : null}
+                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) < PVRLimit && PAWP < PAWPThreshold) ? "Undifferentiated pulmonary hypertension" : null}
+                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) >= PVRLimit && PAWP < PAWPThreshold) ? "Pre-capillary pulmonary hypertension" : null}
+                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) < PVRLimit && PAWP >= PAWPThreshold) ? "Post-capillary pulmonary hypertension" : null}
+                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) >= PVRLimit && PAWP >= PAWPThreshold) ? "Combined pulmonary hypertension" : null}
+                        </Typography>
+
+                      <Typography variant="caption">
+                          <div className={classes.simulatorResultNumbers}>
+                              {"Probability of diagnostic error: "}
                             {method === "absolute" ? (
                                 Number((P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)
                                     + P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)) * 100).toFixed(2)
@@ -148,8 +165,8 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                             )
                             }%
                         </div>
-                    </Typography>
-                </div>
+                      </Typography>
+                    </Paper>
             </div>
 
             <div className={classes.measuresInput}>

@@ -2,6 +2,7 @@ import React, {Fragment, useEffect, useState} from "react";
 import { line, scaleLinear, scaleTime } from "d3";
 import * as d3 from "d3";
 import { makeStyles } from 'tss-react/mui';
+import {isMobile} from "../utils";
 
 
 
@@ -22,6 +23,10 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
       fontSize: '16px',
     },
     legend: {
+        fill: 'rgba(141,140,140,0.75)',
+        fontSize: '12px',
+    },
+    legend_title: {
         fill: 'rgba(141,140,140,0.75)',
         fontSize: '16px',
     },
@@ -172,10 +177,11 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, uppe
 
             // Site label (upper right)
             <text
-                className={classes.legend}
-                transform={`translate(${layout.width - 100}, 20)`}
+                className={classes.legend_title}
+                transform={isMobile() ? `translate(${layout.width - 100}, 20)` : `translate(${layout.width - 100}, 40)`}
             >
-                {"Probability of DD"}
+                {"Probability of"}
+                {isMobile() ? <tspan x="0" dy="1.2em">{"diagnostic error"}</tspan> : " diagnostic error"}
             </text>
 
             // y-axis label
@@ -198,26 +204,26 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, uppe
             // Add legend
             <text
                 className={classes.legend}
-                transform={`translate(${layout.width - 100}, 40)`}
+                transform={`translate(${layout.width - 100}, 60)`}
             >
-                {"DD+"}
+                {"P(PVR < "  +PVRLimit +") with direct Fick"}
             </text>
             <text
                 className={classes.legend}
-                transform={`translate(${layout.width - 100}, 60)`}
+                transform={`translate(${layout.width - 100}, 80)`}
             >
-                {"DD-"}
+                {"P(PVR ≤ "  +PVRLimit +") with direct Fick"}
             </text>
 
             <line
                 className={classes.graph_DDplus_data}
-                x1={layout.width - 60} y1={35}
-                x2={layout.width - 50} y2={35}
+                x1={isMobile() ?  layout.width + 50 : layout.width + 70} y1={56}
+                x2={isMobile() ?  layout.width + 58 : layout.width + 60} y2={56}
             />
             <line
                 className={classes.graph_DDminus_data}
-                x1={layout.width - 60} y1={55}
-                x2={layout.width - 50} y2={55}
+                x1={isMobile() ?  layout.width + 50 : layout.width + 60} y1={76}
+                x2={isMobile() ?  layout.width + 58 : layout.width + 70} y2={76}
             />
 
             // Axes
@@ -237,7 +243,8 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, uppe
                 x1={graphDetails.xScale(COatPVRLimit)}
                 y1={graphDetails.yScale(0)}
                 x2={graphDetails.xScale(COatPVRLimit)}
-                y2={graphDetails.yScale(0.1)}
+                // y2={graphDetails.yScale(-0.1)}
+                y2={graphDetails.yScale(-0)}
                 stroke="#666"
                 strokeWidth={0.2}
                 style={{ transition: "ease-out .1s" }}
@@ -246,7 +253,8 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, uppe
                 fill="#666"
                 fontSize={8}
                 x={graphDetails.xScale(COatPVRLimit) - 15}
-                y={graphDetails.yScale(0.15)}
+                // y={graphDetails.yScale(-0.15)}
+                y={graphDetails.yScale(0.55)}
             >
                 PVR = {PVRLimit}
             </text>
