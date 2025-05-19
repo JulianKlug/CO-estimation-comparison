@@ -70,7 +70,7 @@ const DiagnosticDisagreementSimulator = ({ }) => {
     const {classes} = useStyles();
     const [method, setMethod] = useState("absolute");
     const [lowerBoundCO, setLowerBoundCO] = useState(1.3);
-    const [upperBoundCO, setUpperBoundCO] = useState(20);
+    const [upperBoundCO, setUpperBoundCO] = useState(50);
     const [LoA, setLoA] = useState(2);
     const [PVRLimit, setPVRLimit] = useState(2);
     const [mPAP, setMPAP] = useState();
@@ -130,6 +130,7 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                         setLoA={setLoA} setLowerBoundCO={setLowerBoundCO} setUpperBoundCO={setUpperBoundCO}
                         setPVRThreshold={setPVRLimit}
                         method={method} setMethod={setMethod}
+                        allowCOBoundsModification={false}
                     />
                 </div>
                 <div className={classes.refreshButtonPosition}>
@@ -141,29 +142,35 @@ const DiagnosticDisagreementSimulator = ({ }) => {
                 <Graph DDPlusData={simulatedDDlus} DDMinusData={simulatedDDMinus}
                        measuredCO={mCO}
                        mPAP={mPAP} PAWP={PAWP} PVRLimit={PVRLimit}
-                       upperBoundCO={upperBoundCO}
                 />
             </div>
             <div className={classes.simulatorResults}>
                     <Paper elevation={1} className={classes.simulatorResultsItem}>
                         <Typography variant={'subtitle2'} className={classes.simulatorResultsText}>
                             {(mPAP < 20 || isNaN(mPAP)) ? "No pulmonary hypertension" : null}
-                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) < PVRLimit && PAWP < PAWPThreshold) ? "Undifferentiated pulmonary hypertension" : null}
+                            {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) < PVRLimit && PAWP < PAWPThreshold) ? "Unclassified pulmonary hypertension" : null}
                             {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) >= PVRLimit && PAWP < PAWPThreshold) ? "Pre-capillary pulmonary hypertension" : null}
                             {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) < PVRLimit && PAWP >= PAWPThreshold) ? "Post-capillary pulmonary hypertension" : null}
                             {(mPAP >= 20 && PVR_calc(mPAP, PAWP, mCO) >= PVRLimit && PAWP >= PAWPThreshold) ? "Combined pulmonary hypertension" : null}
                         </Typography>
 
                       <Typography variant="caption">
-                          <div className={classes.simulatorResultNumbers}>
-                              {"Probability of diagnostic error: "}
-                            {method === "absolute" ? (
-                                Number((P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)
-                                    + P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)) * 100).toFixed(2)
-                            ) : (
-                                Number((relative_P_DD_plus(mPAP, PAWP, mCO, LoA, PVRLimit) + relative_P_DD_minus(mPAP, PAWP, mCO, LoA, PVRLimit)) * 100).toFixed(2)
-                            )
-                            }%
+                        <div className={classes.simulatorResultNumbers}>
+                            {(mPAP < 20 || isNaN(mPAP)) ? 
+                                null :
+                                (
+                                <div>
+                                {"Probability of diagnostic error: "}
+                                {method === "absolute" ? (
+                                    Number((P_DD_plus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)
+                                        + P_DD_minus_given_Ir(mPAP, PAWP, mCO, lowerBoundCO, upperBoundCO, LoA, PVRLimit)) * 100).toFixed(2)
+                                ) : (
+                                    Number((relative_P_DD_plus(mPAP, PAWP, mCO, LoA, PVRLimit) + relative_P_DD_minus(mPAP, PAWP, mCO, LoA, PVRLimit)) * 100).toFixed(2)
+                                )
+                                }%
+                                </div>
+                                )
+                            }
                         </div>
                       </Typography>
                     </Paper>

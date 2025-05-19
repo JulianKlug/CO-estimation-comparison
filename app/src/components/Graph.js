@@ -54,7 +54,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 
 }));
 
-const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, upperBoundCO }) => {
+const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit }) => {
     const {classes} = useStyles();
     const [activeIndex, setActiveIndex] = React.useState(null)
 
@@ -68,8 +68,11 @@ const Graph = ({ DDPlusData, DDMinusData, measuredCO, mPAP, PAWP, PVRLimit, uppe
     };
     const joinedData = [...DDPlusData, ...DDMinusData];
 
+    // let upperBound be 20 or measuredCO + 5 (if measuredCO is not NaN)
+    const xaxis_upper_bound = isNaN(measuredCO) ? 20 : Math.max(measuredCO + 5, 20);
+
     const graphDetails = {
-        xScale: scaleLinear().domain([0, upperBoundCO]).range([0, layout.width]),
+        xScale: scaleLinear().domain([0, xaxis_upper_bound]).range([0, layout.width]),
         yScale: scaleLinear().domain([0, 1]).range([layout.height, 0]),
         lineGenerator: line()
     };
