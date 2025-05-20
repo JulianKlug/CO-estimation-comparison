@@ -69,7 +69,7 @@ const useStyles = makeStyles()((theme, _params, classes) => ({
 const DiagnosticDisagreementSimulator = ({ }) => {
     const {classes} = useStyles();
     const [method, setMethod] = useState("absolute");
-    const [lowerBoundCO, setLowerBoundCO] = useState(1.3);
+    const [lowerBoundCO, setLowerBoundCO] = useState(0.01);
     const [upperBoundCO, setUpperBoundCO] = useState(50);
     const [LoA, setLoA] = useState(2);
     const [PVRLimit, setPVRLimit] = useState(2);

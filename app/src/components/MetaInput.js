@@ -61,56 +61,56 @@ export default function MetaInput({LoA, lowerBoundCO, upperBoundCO, PVRThreshold
                                     }
                     }
             />
-        {method === "absolute" ?
-            (
-                <div style={{'display': 'inline-Flex', 'align-items': 'center'}}>
-                    {/*Lower limit of CO*/}
-                    <TextField
-                        inputProps={{style: {width: "4ch", textAlign: 'right'}}}
-                        id="standard-basic" variant="standard" label={" "} defaultValue={lowerBoundCO}
-                        disabled={!allowCOBoundsModification}
-                        onChange={(event) => {
-                            if (allowCOBoundsModification) {
-                                setLowerBoundCO(event.target.value);
+            {method === "absolute" & allowCOBoundsModification ?
+                (
+                    <div style={{'display': 'inline-Flex', 'align-items': 'center'}}>
+                        {/*Lower limit of CO*/}
+                        <TextField
+                            inputProps={{style: {width: "4ch", textAlign: 'right'}}}
+                            id="standard-basic" variant="standard" label={" "} defaultValue={lowerBoundCO}
+                            disabled={!allowCOBoundsModification}
+                            onChange={(event) => {
+                                if (allowCOBoundsModification) {
+                                    setLowerBoundCO(event.target.value);
+                                }
                             }
-                        }
-                        }
-                    />
-                    <Typography 
-                        sx={{
-                            paddingTop: '2ch', 
-                            paddingLeft: '1ch', 
-                            paddingRight: '1ch',
-                            color: allowCOBoundsModification ? 'inherit' : 'text.disabled'
-                        }}
-                    >
-                        {'–'}
-                    </Typography>
-                    {/*Upper limit of CO*/}
-                    <TextField
-                        fullWidth
-                        inputProps={{style: {width: "2ch"}}}
-                        id="standard-basic" variant="standard" label={"Range of CO"} defaultValue={upperBoundCO}
-                        disabled={!allowCOBoundsModification}
-                        InputProps={{
-                            endAdornment: 
-                                <InputAdornment 
-                                    position="end" 
-                                    disableTypography={!allowCOBoundsModification}
-                                    sx={{ color: allowCOBoundsModification ? 'inherit' : 'text.disabled' }}
-                                >
-                                    L/min
-                                </InputAdornment>
-                        }}
-                        onChange={(event) => {
-                            if (allowCOBoundsModification) {
-                                setUpperBoundCO(event.target.value);
                             }
-                        }
-                        }
-                    />
-                </div>
-            ): null
+                        />
+                        <Typography 
+                            sx={{
+                                paddingTop: '2ch', 
+                                paddingLeft: '1ch', 
+                                paddingRight: '1ch',
+                                color: allowCOBoundsModification ? 'inherit' : 'text.disabled'
+                            }}
+                        >
+                            {'–'}
+                        </Typography>
+                        {/*Upper limit of CO*/}
+                        <TextField
+                            fullWidth
+                            inputProps={{style: {width: "2ch"}}}
+                            id="standard-basic" variant="standard" label={"Range of CO"} defaultValue={upperBoundCO}
+                            disabled={!allowCOBoundsModification}
+                            InputProps={{
+                                endAdornment: 
+                                    <InputAdornment 
+                                        position="end" 
+                                        disableTypography={!allowCOBoundsModification}
+                                        sx={{ color: allowCOBoundsModification ? 'inherit' : 'text.disabled' }}
+                                    >
+                                        L/min
+                                    </InputAdornment>
+                            }}
+                            onChange={(event) => {
+                                if (allowCOBoundsModification) {
+                                    setUpperBoundCO(event.target.value);
+                                }
+                            }
+                            }
+                        />
+                    </div>
+                ): null
         }
 
 
